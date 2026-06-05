@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Features - Image Data Extract Python</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="{{ url_for('index') }}" class="nav-brand">
+            <span class="logo">📄</span>
+            <span class="brand-text">Image Data Extract</span>
+        </a>
+        <div class="nav-links">
+            <a href="{{ url_for('index') }}">Home</a>
+            <a href="{{ url_for('features') }}" class="active">Features</a>
+            <a href="{{ url_for('about') }}">About</a>
+            <a href="{{ url_for('contact') }}">Contact</a>
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
+        </div>
+    </nav>
+
+    <main class="page-main">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-messages">
+              {% for category, message in messages %}
+                <div class="flash-message {{ category }}">{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <div class="section-header">
+            <h2>All Features</h2>
+            <p>Discover everything our AI-powered OCR system can do for you</p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card clay-card">
+                <div class="feature-icon">🌐</div>
+                <h3>Multi Language OCR</h3>
+                <p>Extract text in English, Hindi, and Kannada with high accuracy. Our system supports multiple Indic scripts natively.</p>
+            </div>
+            <div class="feature-card clay-card">
+                <div class="feature-icon">✍️</div>
+                <h3>Handwriting Recognition</h3>
+                <p>Advanced AI models trained to recognize handwritten notes, exam papers, and personal documents with remarkable precision.</p>
+            </div>
+            <div class="feature-card clay-card">
+                <div class="feature-icon">🤖</div>
+                <h3>Auto Language Detection</h3>
+                <p>No need to select language manually. The system automatically detects whether your text is English, Hindi, or Kannada.</p>
+            </div>
+            <div class="feature-card clay-card">
+                <div class="feature-icon">📥</div>
+                <h3>Export Results</h3>
+                <p>Download extracted text as clean TXT files. Copy to clipboard with one click. Share results instantly.</p>
+            </div>
+            <div class="feature-card clay-card">
+                <div class="feature-icon">🌓</div>
+                <h3>Dark Mode</h3>
+                <p>Comfortable viewing experience in both light and dark themes. Automatically remembers your preference.</p>
+            </div>
+            <div class="feature-card clay-card">
+                <div class="feature-icon">🎯</div>
+                <h3>Crash-Safe Engines</h3>
+                <p>Uses Tesseract as primary engine with optional EasyOCR and PaddleOCR. Isolated loading prevents crashes.</p>
+            </div>
+            <div class="feature-card clay-card">
+                <div class="feature-icon">🔒</div>
+                <h3>Privacy First</h3>
+                <p>Your images are processed locally in the container. No data is sent to external APIs or stored permanently.</p>
+            </div>
+            <div class="feature-card clay-card">
+                <div class="feature-icon">📱</div>
+                <h3>Responsive Design</h3>
+                <p>Works beautifully on desktop, laptop, tablet, and mobile. Liquid glass UI adapts to any screen size.</p>
+            </div>
+            <div class="feature-card clay-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Fast Processing</h3>
+                <p>OpenCV preprocessing pipeline optimizes images before OCR. Results appear in seconds, not minutes.</p>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 3rem;">
+            <a href="{{ url_for('index') }}" class="btn btn-primary">Try It Now</a>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>Developed by <a href="https://github.com/issu321" target="_blank">issu321</a></p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

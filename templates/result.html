@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Results - Image Data Extract Python</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="{{ url_for('index') }}" class="nav-brand">
+            <span class="logo">📄</span>
+            <span class="brand-text">Image Data Extract</span>
+        </a>
+        <div class="nav-links">
+            <a href="{{ url_for('index') }}">Home</a>
+            <a href="{{ url_for('features') }}">Features</a>
+            <a href="{{ url_for('about') }}">About</a>
+            <a href="{{ url_for('contact') }}">Contact</a>
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
+        </div>
+    </nav>
+
+    <main class="result-main">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-messages">
+              {% for category, message in messages %}
+                <div class="flash-message {{ category }}">{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        {% if analyzing %}
+        <div class="loading-container" id="loadingContainer">
+            <div class="loading-spinner"></div>
+            <h2>Processing Your Image</h2>
+            <p>Running OCR analysis with AI engines...</p>
+            <div class="loading-steps">
+                <div class="loading-step active" id="step1">Preprocessing image...</div>
+                <div class="loading-step" id="step2">Running Tesseract OCR...</div>
+                <div class="loading-step" id="step3">Running EasyOCR (optional)...</div>
+                <div class="loading-step" id="step4">Running PaddleOCR (optional)...</div>
+                <div class="loading-step" id="step5">Detecting language &amp; finalizing...</div>
+            </div>
+        </div>
+
+        <div class="result-container hidden" id="resultContainer">
+            <div class="result-layout">
+                <div class="image-preview-section">
+                    <h3>Uploaded Image</h3>
+                    <div class="image-preview">
+                        <img src="{{ url_for('static', filename='uploads/' + image) }}" alt="Uploaded image" id="previewImage">
+                    </div>
+                </div>
+
+                <div class="results-section">
+                    <h3>OCR Results</h3>
+
+                    <div class="summary-card glass-card">
+                        <div class="summary-item">
+                            <span class="summary-label">Detected Language</span>
+                            <span class="summary-value" id="detectedLanguage">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Confidence Score</span>
+                            <span class="summary-value" id="confidenceScore">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Word Count</span>
+                            <span class="summary-value" id="wordCount">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Character Count</span>
+                            <span class="summary-value" id="charCount">-</span>
+                        </div>
+                    </div>
+
+                    <div class="text-extract-section">
+                        <label for="extractedText">Extracted Text</label>
+                        <textarea id="extractedText" class="extract-textarea" rows="12" placeholder="Extracted text will appear here..."></textarea>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-secondary" id="copyBtn" type="button">📋 Copy Text</button>
+                        <a href="{{ url_for('download', image=image) }}" class="btn btn-primary">📥 Download TXT</a>
+                        <a href="{{ url_for('clear', image=image) }}" class="btn btn-outline">🔄 Analyze Another</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            (function() {
+                async function runAnalysis() {
+                    try {
+                        const response = await fetch('/api/analyze/{{ image }}', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' }
+                        });
+
+                        const data = await response.json();
+
+                        if (data.error) {
+                            alert('Error: ' + data.error);
+                            window.location.href = '/';
+                            return;
+                        }
+
+                        const steps = document.querySelectorAll('.loading-step');
+                        let current = 0;
+                        const interval = setInterval(() => {
+                            if (current < steps.length) {
+                                steps[current].classList.add('active');
+                                current++;
+                            } else {
+                                clearInterval(interval);
+                            }
+                        }, 250);
+
+                        setTimeout(() => {
+                            document.getElementById('loadingContainer').classList.add('hidden');
+                            document.getElementById('resultContainer').classList.remove('hidden');
+
+                            document.getElementById('detectedLanguage').textContent = data.language;
+                            document.getElementById('confidenceScore').textContent = data.confidence + '%';
+                            document.getElementById('wordCount').textContent = data.words;
+                            document.getElementById('charCount').textContent = data.characters;
+                            document.getElementById('extractedText').value = data.text;
+
+                            document.getElementById('copyBtn').addEventListener('click', function() {
+                                const textarea = document.getElementById('extractedText');
+                                textarea.select();
+                                document.execCommand('copy');
+                                this.textContent = '✅ Copied!';
+                                setTimeout(() => { this.textContent = '📋 Copy Text'; }, 2000);
+                            });
+                        }, 1800);
+
+                    } catch (error) {
+                        console.error('Analysis error:', error);
+                        alert('An error occurred during analysis. Please try again.');
+                    }
+                }
+
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', runAnalysis);
+                } else {
+                    runAnalysis();
+                }
+            })();
+        </script>
+
+        {% else %}
+        <div class="result-container">
+            <div class="result-layout">
+                <div class="image-preview-section">
+                    <h3>Uploaded Image</h3>
+                    <div class="image-preview">
+                        <img src="{{ url_for('static', filename='uploads/' + image) }}" alt="Uploaded image">
+                    </div>
+                </div>
+
+                <div class="results-section">
+                    <h3>OCR Results</h3>
+
+                    <div class="summary-card glass-card">
+                        <div class="summary-item">
+                            <span class="summary-label">Detected Language</span>
+                            <span class="summary-value">{{ result.language }}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Confidence Score</span>
+                            <span class="summary-value">{{ result.confidence }}%</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Word Count</span>
+                            <span class="summary-value">{{ result.words }}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Character Count</span>
+                            <span class="summary-value">{{ result.characters }}</span>
+                        </div>
+                    </div>
+
+                    <div class="text-extract-section">
+                        <label for="extractedText">Extracted Text</label>
+                        <textarea id="extractedText" class="extract-textarea" rows="12">{{ result.text }}</textarea>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-secondary" onclick="copyText()" type="button">📋 Copy Text</button>
+                        <a href="{{ url_for('download', image=image) }}" class="btn btn-primary">📥 Download TXT</a>
+                        <a href="{{ url_for('clear', image=image) }}" class="btn btn-outline">🔄 Analyze Another</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function copyText() {
+                const textarea = document.getElementById('extractedText');
+                textarea.select();
+                document.execCommand('copy');
+                const btn = event.target;
+                btn.textContent = '✅ Copied!';
+                setTimeout(() => { btn.textContent = '📋 Copy Text'; }, 2000);
+            }
+        </script>
+        {% endif %}
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>Developed by <a href="https://github.com/issu321" target="_blank">issu321</a></p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
